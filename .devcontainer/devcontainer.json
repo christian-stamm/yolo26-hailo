@@ -1,0 +1,43 @@
+{
+	"name": "Stadtup-Vision",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": {
+			"HWARCH": "amd64",
+			"HAILOVERSION": "4.23.0",
+			"no_proxy": "${env:no_proxy}",
+			"http_proxy": "${env:http_proxy}",
+			"https_proxy": "${env:https_proxy}"
+		}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools",
+				"ms-vscode.cpptools-extension-pack",
+				"ms-vscode.cmake-tools",
+				"llvm-vs-code-extensions.vscode-clangd",
+				"ms-python.python",
+				"ms-python.debugpy",
+				"ms-python.black-formatter",
+				"ms-iot.vscode-ros",
+				"ms-python.isort"
+			]
+		}
+	},
+	"mounts": [
+		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+	],
+	"remoteEnv": {
+		"no_proxy": "${env:no_proxy}",
+		"http_proxy": "${env:http_proxy}",
+		"https_proxy": "${env:https_proxy}",
+		"DISPLAY": "${env:DISPLAY}",
+		"ROS_DOMAIN_ID": "42",
+		"HAILO_MONITOR": "1"
+	},
+	"runArgs": [
+		"--privileged",
+		"--net=host"
+	]
+}

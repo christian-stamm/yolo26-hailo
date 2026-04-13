@@ -1,0 +1,33 @@
+{
+    "editor.formatOnSave": true,
+    "cmake.ignoreCMakeListsMissing": true,
+    "clangd.path": "/bin/clangd-14",
+    "ros.distro": "humble",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "always"
+        },
+    },
+    "isort.args": [
+        "--profile",
+        "black"
+    ],
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}/install/detection_demo/lib/python3.10/site-packages",
+        "${workspaceFolder}/install/detection_eval/lib/python3.10/site-packages",
+        "${workspaceFolder}/install/nodelink/lib/python3.10/site-packages",
+        "/env/hailovenv/lib/python3.10/site-packages/",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/install/detection_demo/lib/python3.10/site-packages",
+        "${workspaceFolder}/install/detection_eval/lib/python3.10/site-packages",
+        "${workspaceFolder}/install/nodelink/lib/python3.10/site-packages",
+        "/env/hailovenv/lib/python3.10/site-packages/",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:system"
+}

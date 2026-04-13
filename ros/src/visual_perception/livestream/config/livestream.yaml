@@ -1,0 +1,12 @@
+StreamDemo:
+  ros__parameters:
+    pub_video_source: /workspaces/yolo26-hailo/res/highway.mp4
+    pub_video_rate: 24.0
+    detector_min_edge_px: 640
+    upscale_to_min_edge: false
+    frame_cache_size: 60
+    pub_video_topic_prefix: /flir_camera
+    pub_video_topic_suffix: /image_raw
+    sub_detbox_topic_prefix: /yolo26
+    sub_detbox_topic_suffix: /detstream
+    pub_detbox_topic_suffix: /image_bbox

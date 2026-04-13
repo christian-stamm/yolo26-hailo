@@ -1,0 +1,3 @@
+sensor_msgs/Image sample
+---
+visual_perception_interface/BBoxDetList boxes
