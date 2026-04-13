@@ -1,0 +1,7 @@
+vision/vp_visualization_node:
+  ros__parameters:
+    video_topic: /vision/detector/fast/img
+    bbox_topic: /vision/detector/fast/det
+    buffer_size: 10
+    display_window: true
+    publish_results: false

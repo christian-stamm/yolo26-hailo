@@ -1,0 +1,9 @@
+[submodule "res/datasets/parser/cityscapes-to-coco"]
+	path = res/datasets/parser/cityscapes-to-coco
+	url = https://github.com/TillBeemelmanns/cityscapes-to-coco-conversion
+[submodule "res/datasets/parser/waymo-to-coco"]
+	path = res/datasets/parser/waymo-to-coco
+	url = https://github.com/shinya7y/WaymoCOCO.git
+[submodule "res/datasets/parser/nuscenes-to-coco/json2d-to-coco"]
+	path = res/datasets/parser/nuscenes-to-coco
+	url = https://github.com/AlizadehAli/2D_label_parser

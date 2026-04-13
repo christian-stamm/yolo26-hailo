@@ -1,0 +1,6 @@
+vision/vp_detector_node:
+  ros__parameters:
+    hef_path: "/workspaces/yolo26-hailo/res/models/yolo26n.hef"
+    img_width: 640
+    img_height: 640
+    conf_thresh: 0.25

@@ -1,0 +1,6 @@
+vision/vp_cvstreamer_node:
+  ros__parameters:
+    pub_video_topic: detector/fast/img
+    pub_video_source: "0"
+    pub_video_rate: 24.0
+    

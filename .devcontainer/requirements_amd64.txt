@@ -1,0 +1,13 @@
+catkin_pkg
+empy==3.3.4
+hailo-dataflow-compiler @ file:///tmp/hailo_dataflow_compiler-3.33.1-py3-none-linux_x86_64.whl
+lark
+numpy
+onnx
+onnxruntime 
+opencv-python
+pydantic
+tensorflow
+torch
+torchvision
+ultralytics
