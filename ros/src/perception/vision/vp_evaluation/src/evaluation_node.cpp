@@ -135,7 +135,7 @@ class PendingBuffer {
 // ================================================================
 
 using Name = std::string;
-using json = nlohmann::json;
+using json = nlohmann::ordered_json;
 using Path = std::filesystem::path;
 
 class EvaluationNode : public rclcpp::Node {
@@ -163,18 +163,18 @@ class EvaluationNode : public rclcpp::Node {
 
         pendings_ = std::make_unique<PendingBuffer>(buffer_size);
 
-        result_header_ = {
-            {"launched", time},
-            {"terminated", UNDEFINED_PARAM},
-            {"dataset_root", this->dataset_root.string()},
-            {"dataset_name", dataset_name},
-            {"annotation_file", annotation_file.string()},
-            {"prediction_file", prediction_file.string()},
-            {"evaluation_file", evaluation_file.string()},
-        };
+        result_header_                    = json::object();
+        result_header_["launched"]        = time;
+        result_header_["terminated"]      = UNDEFINED_PARAM;
+        result_header_["dataset_name"]    = dataset_name;
+        result_header_["annotation_file"] = annotation_file.string();
+        result_header_["prediction_file"] = prediction_file.string();
+        result_header_["evaluation_file"] = evaluation_file.string();
 
         rclcpp::QoS qos = rclcpp::SensorDataQoS();
-        qos.keep_last(1).reliable();
+        qos.durability(RMW_QOS_POLICY_DURABILITY_VOLATILE);
+        qos.best_effort();
+        qos.keep_last(1);
 
         publisher_ = create_publisher<sensor_msgs::msg::Image>(pub_topic, qos);
 
@@ -205,7 +205,9 @@ class EvaluationNode : public rclcpp::Node {
         file >> content;
 
         for (const auto& category : content["categories"]) {
-            catmapping_.emplace(category["name"].get<std::string>(), category["id"].get<int>());
+            int cid = category["id"].get<int>();
+            catmapping_.emplace(category["name"].get<std::string>(), cid);
+            cat_ids_.insert(cid);
         }
 
         for (const auto& entry : content["images"]) {
@@ -286,15 +288,47 @@ class EvaluationNode : public rclcpp::Node {
             LetterBox item;
             pendings_->get(id, item);
 
-            json result = nlohmann::ordered_json::array();
+            json result = json::array();
             for (const auto& box : msg->detections) {
-                int category_id = box.class_id;
-                if (box.class_id >= 0 && static_cast<size_t>(box.class_id) < msg->labels.size()) {
-                    const auto& category_name = msg->labels[static_cast<size_t>(box.class_id)];
-                    const auto  it            = catmapping_.find(category_name);
-                    if (it != catmapping_.end()) {
-                        category_id = it->second;
+                int         category_id = -1;
+                std::string label_name;
+
+                if (!msg->labels.empty()) {
+                    if (static_cast<size_t>(box.class_id) < msg->labels.size()) {
+                        label_name    = msg->labels[static_cast<size_t>(box.class_id)];
+                        const auto it = catmapping_.find(label_name);
+                        if (it != catmapping_.end()) {
+                            category_id = it->second;
+                        }
+                        else {
+                            RCLCPP_WARN_STREAM(
+                                get_logger(),
+                                "Unknown label '" << label_name << "' not found in annotation categories");
+                        }
                     }
+                    else {
+                        RCLCPP_WARN_STREAM(
+                            get_logger(), "Label index " << box.class_id << " out of range (labels size: "
+                                                         << msg->labels.size() << ")");
+                    }
+                }
+                else {
+                    // No label names provided by the detector; try treating class_id as COCO category id
+                    if (cat_ids_.count(static_cast<int>(box.class_id))) {
+                        category_id = static_cast<int>(box.class_id);
+                    }
+                    else {
+                        RCLCPP_WARN_STREAM(
+                            get_logger(),
+                            "No labels in message and class_id " << box.class_id << " is not a known category id");
+                    }
+                }
+
+                if (category_id < 0) {
+                    RCLCPP_WARN_STREAM(
+                        get_logger(),
+                        "Skipping detection for image " << id << " with unmapped class_id " << box.class_id);
+                    continue;
                 }
 
                 const float x_min = (box.box_pos_x - box.box_dim_x / 2.0f) * item.original_width /
@@ -326,17 +360,17 @@ class EvaluationNode : public rclcpp::Node {
 
     void safe_predictions()
     {
-        json result         = nlohmann::ordered_json::object();
-        result["inference"] = nlohmann::ordered_json::array();
+        result_header_.at("terminated") = get_time();
+
+        json result;
+        result["metadata"]  = result_header_;
+        result["inference"] = json::array();
 
         for (const auto& [_, entries] : closedset) {
             for (const auto& e : entries) {
                 result["inference"].push_back(e);
             }
         }
-
-        result["metadata"] = result_header_;
-        result["metadata"].emplace("terminated", get_time());
 
         std::filesystem::create_directories(prediction_file.parent_path());
         std::ofstream out(prediction_file);
@@ -354,11 +388,6 @@ class EvaluationNode : public rclcpp::Node {
         std::ostringstream oss;
         oss << std::put_time(&tm, "%Y-%m-%d-%H-%M-%S");
         return oss.str();
-    }
-
-    static std::string build_filename()
-    {
-        return "predictions-" + get_time() + ".json";
     }
 
     // ------------------------------------------------------------
@@ -384,6 +413,7 @@ class EvaluationNode : public rclcpp::Node {
     std::map<uint64_t, Path>              openset;
     std::map<uint64_t, std::vector<json>> closedset;
     std::unordered_map<std::string, int>  catmapping_;
+    std::unordered_set<int>               cat_ids_;
 
     std::unique_ptr<PendingBuffer> pendings_;
 

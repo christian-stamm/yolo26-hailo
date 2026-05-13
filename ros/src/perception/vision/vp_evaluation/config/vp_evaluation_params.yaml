@@ -4,7 +4,7 @@ vision/vp_evaluation_node:
     dataset_name: "coco"
     annotation_file: "instances_val2017.json"
 
-    pub_img_topic: "/vision/detector/fast/img"
-    sub_det_topic: "/vision/detector/fast/det"
-    stream_rate: 100.0
-    buffer_size: 10
+    pub_img_topic: "/vision/detector/img"
+    sub_det_topic: "/vision/detector/det"
+    stream_rate: 20.0
+    buffer_size: 25

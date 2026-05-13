@@ -74,7 +74,8 @@ class VisuNode : public rclcpp::Node {
 
         // Draw bounding boxes on the image
         for (const auto& det : bbox_msg->detections) {
-            cv::Rect box(det.box_pos_x, det.box_pos_y, det.box_dim_x, det.box_dim_y);
+            cv::Rect box(
+                det.box_pos_x - det.box_dim_x / 2, det.box_pos_y - det.box_dim_y / 2, det.box_dim_x, det.box_dim_y);
             cv::rectangle(cv_ptr->image, box, cv::Scalar(0, 255, 0), 2);
             std::string label     = "ID: " + std::to_string(det.class_id) + " Conf: " + std::to_string(det.confidence);
             int         baseline  = 0;
