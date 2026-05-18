@@ -69,34 +69,8 @@ function installDocker()
 
 function installDriver()
 {
-    BUILD_PATH="/tmp/hailo"
-    REPO_PATH=$BUILD_PATH/hailo-driver
-    HAILO_FW_PATH="/lib/firmware/hailo"
-
-    BASE_URI="https://hailo-hailort.s3.eu-west-2.amazonaws.com"
-    HRT_VERSION=4.20.1
-    FW_AWS_DIR="Hailo8/${HRT_VERSION}/FW"
-    FW="hailo8_fw.${HRT_VERSION}.bin"
-
-    sudo mkdir -p $BUILD_PATH
-    sudo mkdir -p $HAILO_FW_PATH
-    sudo chown -R $USER $BUILD_PATH
-    sudo git clone https://github.com/hailo-ai/hailort-drivers.git $REPO_PATH --recurse-submodules
-
-    cd $REPO_PATH/linux/pcie
-    sudo ln -sf /boot/System.map-$(uname -r) /usr/src/linux-headers-$(uname -r)/System.map
-    sudo make clean  && sudo make all && sudo make install 
-
-    sudo wget --no-check-certificate ${BASE_URI}/${FW_AWS_DIR}/${FW} -O $HAILO_FW_PATH/hailo8_fw.bin
-    sudo cp $REPO_PATH/linux/pcie/51-hailo-udev.rules /etc/udev/rules.d/
-    sudo modprobe hailo_pci
-}
-
-function restartSystem()
-{
-    echo Rebooting in 3s...
-    sleep 3
-    sudo reboot
+    sudo dpkg -i hailort_4.23.0_arm64.deb
+    sudo dpkg -i hailort-pcie-driver_4.23.0_all.deb
 }
 
 ################################################################################################
@@ -115,4 +89,3 @@ echo "[CONFIGURING DOCKER] Done."
 echo "[CONFIGURING HDRIVER] Start."
 installDriver
 echo "[CONFIGURING HDRIVER] Done."
-restartSystem
